@@ -1,0 +1,54 @@
+{
+    "ALARMS": [
+        {
+            "enable": "true",
+            "id": "Seismic_Alarm_1",
+            "inTopic": "mobiloitteiothub/mqtthub/mqtthub/MMA8451/2c3ae843187c/out",
+            "modulename": "Alarm_Seismic_Alarm_1.py",
+            "name": "Seismic_Alarm",
+            "outTopic": "mobiloitteiothub/mqtthub/mqtthub/MMA8451/2c3ae843187c/in",
+            "type": "python"
+        }
+    ],
+    "SCHEDULE":[
+        {
+            "name":"Garden watering",
+            "id":"1",
+            "enable":"true",
+            "cornTiming":"1 * * * *",
+            "scriptType":"javascript",
+            "scriptPath":"scripts/js/test.js"
+        }
+    ],
+    "BINDINGS":[
+        {
+            "name": "auto_newBinder",
+            "id": "TEMP_AC_Binder_1",
+            "cornTiming": "*/30 * * * * *",
+            "enabled": "false",
+            "sensor": {
+              "MAC": "60019410002e",
+              "sensorID": "1",
+              "sensotType": "DHT11",
+              "valueType": "digital"
+            },
+            "actuators": [
+              {
+                "MAC": "60019438dea7",
+                "senasorID": "1",
+                "sensorType": "RL20A",
+                "stateMap": [
+                  {
+                    "condition": "${sensorValue}<=16",
+                    "state": "OFF"
+                  },
+                  {
+                    "condition": "${sensorValue}>=\"16\"",
+                    "state": "ON"
+                  }
+                ]
+              }
+            ]
+          }
+    ]
+}

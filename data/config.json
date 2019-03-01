@@ -1,0 +1,45 @@
+{
+  "ALARMS": [
+    {
+      "enable": "true",
+      "id": "1",
+      "inTopic": "mobiloitteiothub/mqtthub/mqtthub/DOORBELL/6001943a7e3d/out",
+      "modulename": "scripts/js/camshot.js",
+      "name": "BoorBell Alarm",
+      "outTopic": "mobiloitteiothub/mqtthub/mqtthub/DOORBELL/6001943a7e3d/in",
+      "type": "javascript"
+    }
+  ],
+  "SCHEDULE": [],
+  "BINDINGS": [
+    {
+      "name": "auto_newBinder",
+      "id": "TEMP_AC_Binder_1",
+      "cornTiming": "*/30 * * * * *",
+      "enabled": "false",
+      "sensor": {
+        "MAC": "60019410002e",
+        "sensorID": "1",
+        "sensotType": "DHT11",
+        "valueType": "digital"
+      },
+      "actuators": [
+        {
+          "MAC": "60019438dea7",
+          "senasorID": "1",
+          "sensorType": "RL20A",
+          "stateMap": [
+            {
+              "condition": "${sensorValue}<=16",
+              "state": "OFF"
+            },
+            {
+              "condition": "${sensorValue}>=\"16\"",
+              "state": "ON"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
