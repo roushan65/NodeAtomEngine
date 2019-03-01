@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { connect, IClientOptions, MqttClient } from "mqtt";
-import  * as nodeEval  from "node-eval";
+//import  * as nodeEval  from "node-eval";
 import { AppProperties } from "../appProperties/AppProperties";
 import { DEBUG } from "./../helpers/DEBUG";
 
