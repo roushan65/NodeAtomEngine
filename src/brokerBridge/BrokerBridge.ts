@@ -1,4 +1,4 @@
-import { connect } from "mqtt";
+import { connect, ISubscriptionMap, QoS } from "mqtt";
 import { IClientOptions, MqttClient } from "mqtt";
 import { BindCommandConverter } from "../selfProgrammer/BindCommand";
 import { SceneSlotCommandConverter } from "../selfProgrammer/SceneSlotCommand";
@@ -29,33 +29,48 @@ export class BrokerBridge {
     }
 
     public connectToLocalBroker() {
-        const clientOptions: IClientOptions = {
-            clientId: AppProperties.clientMacAddress + "_mqttjs_" + Math.random().toString(16).substr(2, 8),
-            username: AppProperties.localBrokerUsername,
-            password: AppProperties.localBrokerPassword,
-            keepalive: 10,
-            port: AppProperties.publicBrokerHostPort,
-            connectTimeout: 5000,
-            reconnectPeriod: 2000,
-        };
+        let clientOptions: IClientOptions 
+        if(AppProperties.localBrokerRequirePassword){
+            clientOptions = {
+                clientId: AppProperties.clientMacAddress + "_mqttjs_" + Math.random().toString(16).substr(2, 8),
+                username: AppProperties.localBrokerUsername,
+                password: AppProperties.localBrokerPassword,
+                keepalive: 10,
+                port: AppProperties.publicBrokerHostPort,
+                connectTimeout: 5000,
+                reconnectPeriod: 2000,
+            };
+        }else{
+            clientOptions = {
+                clientId: AppProperties.clientMacAddress + "_mqttjs_" + Math.random().toString(16).substr(2, 8),
+                keepalive: 10,
+                port: AppProperties.publicBrokerHostPort,
+                connectTimeout: 5000,
+                reconnectPeriod: 2000,
+            };
+        }
         this.localClient = connect(AppProperties.localBrokerHostName, clientOptions);
         this.localClient.on("connect", () => { this.localOnConnect(); });
         this.localClient.on("message", (topic, message) => { this.localOnMessageArrived(topic, message.toString()); });
-        this.localClient.on("reconnect", () => { this.localReconnet(); });
+        this.localClient.on("reconnect", () => { this.localReconnect(); });
         this.localClient.on("error", (err) => { this.localOnError(err); });
     }
 
     public localOnConnect() {
         if (this.localClient != null) {
             DEBUG.log("Connected to local Broker. Subscribing now...");
-            const topicsToSubscribe = [
-                "mobiloitteiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/+/+/out",
-                "mobiloitteiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/discover/out",
-            ];
+            const qos: QoS = AppProperties.localSubscribeQos;
+            const topicsToSubscribe:ISubscriptionMap = {
+                ["atomiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/+/+/out"]:qos,
+                ["atomiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/discover/out"]:qos
+            };
             this.localClient.subscribe(topicsToSubscribe, (err, grantedTopics) => {
                 if (!err) {
                     grantedTopics.forEach((topic) => {
-                        DEBUG.log("LOCAL Sunscribed to: " + JSON.stringify(topic));
+                        if(topic.qos<=3)
+                            DEBUG.log("LOCAL Subscribed to: " + JSON.stringify(topic));
+                        else
+                            DEBUG.log("Error Subscribing on LOCAL: " + JSON.stringify(topic));
                     });
                 } else {
                     DEBUG.log("LOCAL Subscribe Error: " + JSON.stringify(err));
@@ -87,7 +102,7 @@ export class BrokerBridge {
         }
     }
 
-    public localReconnet() {
+    public localReconnect() {
         DEBUG.log("Reconnecting to local broker...");
     }
 
@@ -96,42 +111,58 @@ export class BrokerBridge {
     }
 
     public connectToPublicBroker() {
-        const clientOptions: IClientOptions = {
-            clientId: AppProperties.clientMacAddress + "_mqttjs_" + Math.random().toString(16).substr(2, 8),
-            // username: AppProperties.clientMacAddress,
-            // password: AppProperties.publicBrokerPassword,
-            keepalive: 10,
-            port: AppProperties.publicBrokerHostPort,
-            connectTimeout: 5000,
-            reconnectPeriod: 1000,
-        };
+        let clientOptions: IClientOptions;
+        if(AppProperties.publicBrokerRequirePassword){
+            clientOptions = {
+                clientId: AppProperties.clientMacAddress + "_mqttjs_" + Math.random().toString(16).substr(2, 8),
+                username: AppProperties.clientMacAddress,
+                password: AppProperties.publicBrokerPassword,
+                keepalive: 10,
+                port: AppProperties.publicBrokerHostPort,
+                connectTimeout: 5000,
+                reconnectPeriod: 1000,
+            };
+        }
+        else{
+            clientOptions = {
+                clientId: AppProperties.clientMacAddress + "_mqttjs_" + Math.random().toString(16).substr(2, 8),
+                keepalive: 10,
+                port: AppProperties.publicBrokerHostPort,
+                connectTimeout: 5000,
+                reconnectPeriod: 1000,
+            };
+        }
         this.publicClient = connect(AppProperties.publicBrokerHostName, clientOptions);
         this.publicClient.on("connect", () => { this.publicOnConnect(); });
         this.publicClient.on("message", (topic, message) => { this.publicOnMessageArrived(topic, message.toString()); });
-        this.publicClient.on("reconnect", () => { this.publicReconnet(); });
+        this.publicClient.on("reconnect", () => { this.publicReconnect(); });
     }
 
     public publicOnConnect() {
         if (this.publicClient != null) {
             DEBUG.log("connected to public Broker");
-            // this.publicClient.subscribe('mobiloitteiothub/202481586688028/ping');
-            const topicsToSubscribe = [
-                "mobiloitteiothub/" + AppProperties.clientMacAddress + "/+/+/in",
-                "mobiloitteiothub/" + AppProperties.clientMacAddress + "/discover/in",
-                "mobiloitteiothub/" + AppProperties.clientMacAddress + "/scheduler/in",
-                "mobiloitteiothub/" + AppProperties.clientMacAddress + "/binder/in",
-                "mobiloitteiothub/" + AppProperties.clientMacAddress + "/alarms/in",
-                "mobiloitteiothub/" + AppProperties.clientMacAddress + "/config/in",
-                "mobiloitteiothub/" + AppProperties.clientMacAddress + "/streamer/in",
-                "mobiloitteiothub/" + AppProperties.clientMacAddress + "/ping",
-            ];
+            // this.publicClient.subscribe('atomiothub/202481586688028/ping');
+            const qos:QoS = AppProperties.publicSubscribeQos;
+            const topicsToSubscribe: ISubscriptionMap = {
+                ["atomiothub/" + AppProperties.clientMacAddress + "/+/+/in"]:qos,
+                ["atomiothub/" + AppProperties.clientMacAddress + "/discover/in"]:qos,
+                ["atomiothub/" + AppProperties.clientMacAddress + "/scheduler/in"]:qos,
+                ["atomiothub/" + AppProperties.clientMacAddress + "/binder/in"]:qos,
+                ["atomiothub/" + AppProperties.clientMacAddress + "/alarms/in"]:qos,
+                ["atomiothub/" + AppProperties.clientMacAddress + "/config/in"]:qos,
+                ["atomiothub/" + AppProperties.clientMacAddress + "/streamer/in"]:qos,
+                ["atomiothub/" + AppProperties.clientMacAddress + "/ping"]:qos
+            };
             this.publicClient.subscribe(topicsToSubscribe, (err, grantedTopics) => {
                 if (!err) {
                     grantedTopics.forEach((topic) => {
-                        DEBUG.log("PUBLIC Sunscribed to: " + JSON.stringify(topic));
+                        if(topic.qos<=3)
+                            DEBUG.log("PUBLIC Subscribed to: " + JSON.stringify(topic));
+                        else
+                            DEBUG.log("Error Subscribing on PUBLIC: " + JSON.stringify(topic));
                     });
                 } else {
-                    DEBUG.log("PUBLIC Subscribe Publically  Error: " + JSON.stringify(err));
+                    DEBUG.log("PUBLIC Subscribe Publicly  Error: " + JSON.stringify(err));
                 }
             });
         }
@@ -150,10 +181,10 @@ export class BrokerBridge {
                     if (this.publicClient) {
                         if ("endTime" in response) {
                             const sceneSlotCommand: any = response;
-                            this.publicClient.publish("mobiloitteiothub/" + AppProperties.clientMacAddress + "/scheduler/out", SceneSlotCommandConverter.sceneSlotCommandToJson(sceneSlotCommand));
+                            this.publicClient.publish("atomiothub/" + AppProperties.clientMacAddress + "/scheduler/out", SceneSlotCommandConverter.sceneSlotCommandToJson(sceneSlotCommand));
                         } else {
                             const timeSlotCommand: any = response;
-                            this.publicClient.publish("mobiloitteiothub/" + AppProperties.clientMacAddress + "/scheduler/out", TimeSlotCommandConverter.timeSlotCommandToJson(timeSlotCommand));
+                            this.publicClient.publish("atomiothub/" + AppProperties.clientMacAddress + "/scheduler/out", TimeSlotCommandConverter.timeSlotCommandToJson(timeSlotCommand));
                         }
                         DEBUG.log("ScheduleCommand Processing done!!");
                     }
@@ -162,23 +193,23 @@ export class BrokerBridge {
                 DEBUG.log("Processing BinderCommand...");
                 SelfProgrammer.handleBinding(message, (response: BindCommand) => {
                     if (this.publicClient) {
-                        this.publicClient.publish("mobiloitteiothub/" + AppProperties.clientMacAddress + "/binder/out", BindCommandConverter.bindCommandToJson(response));
+                        this.publicClient.publish("atomiothub/" + AppProperties.clientMacAddress + "/binder/out", BindCommandConverter.bindCommandToJson(response));
                         DEBUG.log("BinderCommand Processing done!!");
                     }
                 });
             } else if (topicParts[2] == "alarms") {
                 DEBUG.log("Processing AlarmCommand...");
-                SelfProgrammer.handleAlarms(message, (respose: AlarmCommand) => {
+                SelfProgrammer.handleAlarms(message, (response: AlarmCommand) => {
                     if (this.publicClient) {
-                        this.publicClient.publish("mobiloitteiothub/" + AppProperties.clientMacAddress + "/alarm/out", AlarmCommandConverter.alarmCommandToJson(respose));
+                        this.publicClient.publish("atomiothub/" + AppProperties.clientMacAddress + "/alarm/out", AlarmCommandConverter.alarmCommandToJson(response));
                         DEBUG.log("AlarmCommand Processing done!!");
                     }
                 });
             } else if (topicParts[2] == "streamer") {
                 DEBUG.log("Processing StreamCommand...");
-                StreamFactory.processStreamReauest(message, (response: IStreamResponse) => {
+                StreamFactory.processStreamRequest(message, (response: IStreamResponse) => {
                     if (this.publicClient) {
-                        this.publicClient.publish("mobiloitteiothub/" + AppProperties.clientMacAddress + "/streamer/out", StreamResponseConvert.streamResponseToJson(response));
+                        this.publicClient.publish("atomiothub/" + AppProperties.clientMacAddress + "/streamer/out", StreamResponseConvert.streamResponseToJson(response));
                     }
                     DEBUG.log("StreamCommand Processing done!!");
                 });
@@ -197,7 +228,7 @@ export class BrokerBridge {
         }
     }
 
-    public publicReconnet() {
+    public publicReconnect() {
         DEBUG.log("Reconnecting to public broker...");
     }
 }

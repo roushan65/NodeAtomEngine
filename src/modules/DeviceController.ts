@@ -71,7 +71,7 @@ export class DeviceController {
     public localOnConnect(): any {
         DEBUG.log("Connected to Local Broker");
         const topicsToSubscribe = [
-            "mobiloitteiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/" + this.sensorType + "/" + this.sensorMAC + "/out",
+            "atomiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/" + this.sensorType + "/" + this.sensorMAC + "/out",
         ];
         if (this.localClient) {
             this.localClient.subscribe(topicsToSubscribe, (err, grantedTopics) => {
@@ -80,7 +80,7 @@ export class DeviceController {
                         DEBUG.log("LOCAL Subscribed to: " + JSON.stringify(topic));
                     });
                     if (this.localClient) {
-                        const topicToPublish = "mobiloitteiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/" + this.sensorType + "/" + this.sensorMAC + "/in";
+                        const topicToPublish = "atomiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/" + this.sensorType + "/" + this.sensorMAC + "/in";
                         const command = {
                             type: "COMMAND",
                             sensors: [

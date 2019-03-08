@@ -53,7 +53,7 @@ export class SensorBinder {
     }
 
     public localOnMessageArrived(topic: string, message: string): any {
-        if (topic == "mobiloitteiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/" + this.bining.sensor.sensotType + "/" + this.bining.sensor.MAC + "/out") {
+        if (topic == "atomiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/" + this.bining.sensor.sensotType + "/" + this.bining.sensor.MAC + "/out") {
             // console.log("BINDER receives a Message: " + message + " from " + topic);
             const sensorReading = JSON.parse(message);
             this.bining.actuators.forEach((actuator: Actuator) => {
@@ -73,7 +73,7 @@ export class SensorBinder {
                                 },
                             ],
                         };
-                        const topic = "mobiloitteiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/" + actuator.sensorType + "/" + actuator.MAC + "/in";
+                        const topic = "atomiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/" + actuator.sensorType + "/" + actuator.MAC + "/in";
                         if (this.localClient) {
                             DEBUG.log("publishing " + JSON.stringify(actuatorCommand) + " on " + topic);
                             this.localClient.publish(topic, JSON.stringify(actuatorCommand));
@@ -97,12 +97,12 @@ export class SensorBinder {
         if (this.localClient) {
             DEBUG.log("Binder connected!!");
             const topicTosubscribe = [
-                "mobiloitteiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/" + this.bining.sensor.sensotType + "/" + this.bining.sensor.MAC + "/out",
+                "atomiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/" + this.bining.sensor.sensotType + "/" + this.bining.sensor.MAC + "/out",
             ];
             this.bining.actuators.forEach((actuator: Actuator) => {
-                topicTosubscribe.push("mobiloitteiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/" + actuator.sensorType + "/" + actuator.MAC + "/out");
+                topicTosubscribe.push("atomiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/" + actuator.sensorType + "/" + actuator.MAC + "/out");
             });
-            const publishTopic = "mobiloitteiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/" + this.bining.sensor.sensotType + "/" + this.bining.sensor.MAC + "/in";
+            const publishTopic = "atomiothub/" + AppProperties.localBrokerUsername + "/" + AppProperties.localBrokerPassword + "/" + this.bining.sensor.sensotType + "/" + this.bining.sensor.MAC + "/in";
             this.localClient.subscribe(topicTosubscribe, (err, grantedTopics) => {
                 if (!err && this.localClient) {
                     // DEBUG.log(grantedTopics);

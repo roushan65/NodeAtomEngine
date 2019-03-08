@@ -3,10 +3,10 @@
         {
             "enable": "true",
             "id": "Seismic_Alarm_1",
-            "inTopic": "mobiloitteiothub/mqtthub/mqtthub/MMA8451/2c3ae843187c/out",
+            "inTopic": "atomiothub/mqtthub/mqtthub/MMA8451/2c3ae843187c/out",
             "modulename": "Alarm_Seismic_Alarm_1.py",
             "name": "Seismic_Alarm",
-            "outTopic": "mobiloitteiothub/mqtthub/mqtthub/MMA8451/2c3ae843187c/in",
+            "outTopic": "atomiothub/mqtthub/mqtthub/MMA8451/2c3ae843187c/in",
             "type": "python"
         }
     ],

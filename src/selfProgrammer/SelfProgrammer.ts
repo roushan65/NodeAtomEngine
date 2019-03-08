@@ -39,8 +39,8 @@ export class SelfProgrammer {
         }
 
         const scriptPath: string = "scripts/js/auto_alarm_" + alarmCommand.id + ".js";
-        const inTopic: string = "mobiloitteiothub/" + AppProperties.clientMacAddress + "/" + alarmCommand.sensor.sensor_type + "/" + alarmCommand.sensor.mac + "/in";
-        const outTopic: string = "mobiloitteiothub/" + AppProperties.clientMacAddress + "/" + alarmCommand.sensor.sensor_type + "/" + alarmCommand.sensor.mac + "/out";
+        const inTopic: string = "atomiothub/" + AppProperties.clientMacAddress + "/" + alarmCommand.sensor.sensor_type + "/" + alarmCommand.sensor.mac + "/in";
+        const outTopic: string = "atomiothub/" + AppProperties.clientMacAddress + "/" + alarmCommand.sensor.sensor_type + "/" + alarmCommand.sensor.mac + "/out";
         const newAlarm: Alarm = {
             name: alarmCommand.name,
             id: alarmCommand.id,
@@ -66,8 +66,8 @@ export class SelfProgrammer {
         currentConfig.ALARMS.forEach((alarm: Alarm) => {
             if (alarm.id == alarmCommand.id) {
                 const scriptPath: string = "scripts/js/auto_alarm_" + alarmCommand.id + ".js";
-                const inTopic: string = "mobiloitteiothub/" + AppProperties.clientMacAddress + "/" + alarmCommand.sensor.sensor_type + "/" + alarmCommand.sensor.mac + "/in";
-                const outTopic: string = "mobiloitteiothub/" + AppProperties.clientMacAddress + "/" + alarmCommand.sensor.sensor_type + "/" + alarmCommand.sensor.mac + "/out";
+                const inTopic: string = "atomiothub/" + AppProperties.clientMacAddress + "/" + alarmCommand.sensor.sensor_type + "/" + alarmCommand.sensor.mac + "/in";
+                const outTopic: string = "atomiothub/" + AppProperties.clientMacAddress + "/" + alarmCommand.sensor.sensor_type + "/" + alarmCommand.sensor.mac + "/out";
 
                 alarm.name = alarmCommand.name;
                 alarm.enable = alarm.enable;

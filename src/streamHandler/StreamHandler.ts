@@ -8,7 +8,7 @@ const ffmpeg = require("fluent-ffmpeg");
 
 export class StreamFactory {
 
-    public static processStreamReauest(jsonStr: string, callBack: any) {
+    public static processStreamRequest(jsonStr: string, callBack: any) {
         const jsonObj = JSON.parse(jsonStr);
         if (!jsonObj.type) {
             return;

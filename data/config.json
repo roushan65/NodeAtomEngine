@@ -3,10 +3,10 @@
     {
       "enable": "true",
       "id": "1",
-      "inTopic": "mobiloitteiothub/mqtthub/mqtthub/DOORBELL/6001943a7e3d/out",
+      "inTopic": "atomiothub/mqtthub/mqtthub/DOORBELL/6001943a7e3d/out",
       "modulename": "scripts/js/camshot.js",
       "name": "BoorBell Alarm",
-      "outTopic": "mobiloitteiothub/mqtthub/mqtthub/DOORBELL/6001943a7e3d/in",
+      "outTopic": "atomiothub/mqtthub/mqtthub/DOORBELL/6001943a7e3d/in",
       "type": "javascript"
     }
   ],
